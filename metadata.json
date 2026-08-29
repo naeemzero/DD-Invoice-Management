@@ -1,0 +1,8 @@
+{
+  "name": "DD CMS - Contribution Management System",
+  "description": "Dream Development Contribution & Invoice Management System with Admin and Member portals",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
