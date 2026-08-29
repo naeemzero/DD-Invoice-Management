@@ -92,21 +92,63 @@ img{max-width:100%;display:block;}
 button{cursor:pointer;}
 
 /* ─── AUTH SCREEN ─── */
-.auth-screen{
-  position:fixed;inset:0;
-  background:linear-gradient(135deg,#0F766E 0%,#1a237e 50%,#134E4A 100%);
-  display:flex;align-items:center;justify-content:center;
-  z-index:9000;
-  transition:opacity .3s ease;
+.auth-screen {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, #0F766E 0%, #1a237e 50%, #134E4A 100%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9000;
+  transition: opacity 0.3s ease;
+  padding: 20px;
 }
-.auth-card{
-  background:var(--bg-card);
-  border-radius:var(--r-lg);
-  padding:40px 36px;
-  width:100%;max-width:400px;
-  box-shadow:var(--sh-xl);
+.auth-card {
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-xl);
+  width: 100%;
 }
-.auth-brand{text-align:center;margin-bottom:28px;}
+.auth-split {
+  max-width: 850px;
+  display: flex;
+  overflow: hidden;
+}
+.auth-split-left, .auth-split-right {
+  flex: 1;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.auth-split-left {
+  background: rgba(15, 118, 110, 0.03);
+  border-right: 1px solid var(--border);
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.auth-header h3 {
+  font-size: 1.25rem;
+  color: var(--txt-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.auth-subtext {
+  font-size: 0.9rem;
+  color: var(--txt-muted);
+  margin-top: 4px;
+}
+@media (max-width: 768px) {
+  .auth-split {
+    flex-direction: column;
+  }
+  .auth-split-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+.auth-brand { text-align: center; margin-bottom: 28px; }
 .auth-logo-box{
   width:72px;height:72px;
   border-radius:14px;
@@ -645,6 +687,39 @@ textarea.form-control{resize:vertical;min-height:68px;}
 /* Portal account badge in members table */
 .portal-badge-active{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(15,118,110,.1);color:var(--c-teal);border:1px solid rgba(15,118,110,.2);}
 .portal-badge-none{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:600;background:var(--bg-thead);color:var(--txt-muted);}
+
+/* Live Cloud Sync Status Badge */
+.cloud-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--c-teal);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.cloud-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulseLive 2s infinite ease-in-out;
+}
+.cloud-live-pill.syncing .cloud-live-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+@keyframes pulseLive {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
 
 /* Responsive adjustments for member portal */
 @media(max-width:600px){

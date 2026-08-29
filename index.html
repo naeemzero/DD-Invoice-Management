@@ -17,64 +17,70 @@
      AUTH SCREEN
 ════════════════════════════════════════ -->
 <div id="auth-screen" class="auth-screen">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <div class="auth-logo-box">
-        <img id="auth-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain"/>
-        <span id="auth-logo-text">DD</span>
-      </div>
-      <h1 id="auth-org-name">Dream Development DD</h1>
-      <p class="auth-tagline">Contribution Management System</p>
-    </div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="admin">
-        <i class="fas fa-shield-halved"></i> Admin
-      </button>
-      <button class="auth-tab" data-tab="member">
-        <i class="fas fa-user-circle"></i> Member Portal
-      </button>
-    </div>
-
-    <div id="auth-admin-panel" class="auth-panel">
-      <div class="form-group">
-        <label class="form-label">Admin Password</label>
-        <div class="pwd-input-wrap">
-          <input type="password" id="login-pwd" class="form-control" placeholder="Enter admin password"/>
-          <button type="button" class="pwd-eye" data-for="login-pwd"><i class="fas fa-eye"></i></button>
+  <div class="auth-card auth-split">
+    
+    <!-- Left: Admin Login -->
+    <div class="auth-split-left">
+      <div class="auth-brand">
+        <div class="auth-logo-box">
+          <img id="auth-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain"/>
+          <span id="auth-logo-text">DD</span>
         </div>
+        <h1 id="auth-org-name">Dream Development DD</h1>
+        <p class="auth-tagline">Contribution Management System</p>
       </div>
-      <div id="login-error" class="auth-error hidden"><i class="fas fa-circle-xmark"></i> Incorrect password.</div>
-      <button class="btn btn-primary auth-submit-btn" id="login-btn">
-        <i class="fas fa-right-to-bracket"></i> Sign In
-      </button>
-    </div>
 
-    <div id="auth-member-panel" class="auth-panel hidden">
-      <div class="form-group">
-        <label class="form-label">Member ID</label>
-        <input type="text" id="member-login-id" class="form-control" placeholder="e.g. DD-001"/>
+      <div class="auth-header">
+        <h3><i class="fas fa-shield-halved"></i> Admin Access</h3>
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <div class="pwd-input-wrap">
-          <input type="password" id="member-login-pwd" class="form-control" placeholder="Enter your password"/>
-          <button type="button" class="pwd-eye" data-for="member-login-pwd"><i class="fas fa-eye"></i></button>
+      
+      <div id="auth-admin-panel" class="auth-panel">
+        <div class="form-group">
+          <label class="form-label">Admin Password</label>
+          <div class="pwd-input-wrap">
+            <input type="password" id="login-pwd" class="form-control" placeholder="Enter admin password"/>
+            <button type="button" class="pwd-eye" data-for="login-pwd"><i class="fas fa-eye"></i></button>
+          </div>
         </div>
+        <div id="login-error" class="auth-error hidden"><i class="fas fa-circle-xmark"></i> Incorrect password.</div>
+        <button class="btn btn-primary auth-submit-btn" id="login-btn">
+          <i class="fas fa-right-to-bracket"></i> Sign In as Admin
+        </button>
       </div>
-      <div id="member-login-error" class="auth-error hidden"></div>
-      <button class="btn btn-primary auth-submit-btn" id="member-login-btn">
-        <i class="fas fa-right-to-bracket"></i> Member Sign In
-      </button>
     </div>
 
-    <div class="auth-aux">
-      <button type="button" class="text-link" id="create-account-link">
-        <i class="fas fa-user-plus"></i> No account yet? Create one
-      </button>
+    <!-- Right: Member Portal Login -->
+    <div class="auth-split-right">
+      <div class="auth-header">
+        <h3><i class="fas fa-user-circle"></i> Member Portal</h3>
+        <p class="auth-subtext">Access your personal dashboard</p>
+      </div>
+
+      <div id="auth-member-panel" class="auth-panel">
+        <div class="form-group">
+          <label class="form-label">Member ID</label>
+          <input type="text" id="member-login-id" class="form-control" placeholder="e.g. DD-001"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="pwd-input-wrap">
+            <input type="password" id="member-login-pwd" class="form-control" placeholder="Enter your password"/>
+            <button type="button" class="pwd-eye" data-for="member-login-pwd"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div id="member-login-error" class="auth-error hidden"></div>
+        <button class="btn btn-primary auth-submit-btn" id="member-login-btn">
+          <i class="fas fa-right-to-bracket"></i> Member Sign In
+        </button>
+      </div>
+
+      <div class="auth-aux mt-4">
+        <button type="button" class="text-link" id="create-account-link">
+          <i class="fas fa-user-plus"></i> No account yet? Create one
+        </button>
+      </div>
     </div>
 
-    <p class="auth-footer-note">Dream Development DD &copy; 2026</p>
   </div>
 </div>
 
@@ -131,6 +137,9 @@
       </div>
     </div>
     <div class="mp-header-right">
+      <div id="mp-sync-indicator" class="cloud-live-pill" title="Real-time Live Sync Connected">
+        <span class="cloud-live-dot"></span> <span>Live Sync</span>
+      </div>
       <button class="mp-theme-btn" id="mp-theme-btn" title="Toggle theme"><i class="fas fa-moon"></i></button>
       <div class="mp-user-info">
         <span class="mp-user-name" id="mp-user-name">—</span>
@@ -335,6 +344,9 @@
     <button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button>
     <h1 class="page-title" id="page-title">Dashboard</h1>
     <div class="topbar-actions">
+      <div id="admin-sync-indicator" class="cloud-live-pill" title="Real-time Live Sync Connected">
+        <span class="cloud-live-dot"></span> <span>Live Sync</span>
+      </div>
       <button class="btn btn-primary" data-view="invoice"><i class="fas fa-plus"></i><span>New Invoice</span></button>
       <button class="icon-btn" id="topbar-theme-btn"><i class="fas fa-moon"></i></button>
     </div>
@@ -889,32 +901,36 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  // আপনার নতুন ফায়ারবেস প্রজেক্টের কনফিগারেশন
-  const firebaseConfig = {
-    apiKey: "AIzaSyAD5K9m0lat3-g8lgFGd775UGD-Liq_kvk",
-    authDomain: "dream-development-server.firebaseapp.com",
-    projectId: "dream-development-server",
-    storageBucket: "dream-development-server.firebasestorage.app",
-    messagingSenderId: "1010121727947",
-    appId: "1:1010121727947:web:05d66c7ab1a6b3f924e04e"
-  };
-
-  // ফায়ারবেস চালু করা হচ্ছে
-  const app = initializeApp(firebaseConfig);
-  window.db = getFirestore(app);
-  window.auth = getAuth(app);
-  window.firestore = { doc, getDoc, setDoc };
-  
-  window.firebaseAuth = {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signOut
-  };
-  
-  console.log("Cloud Database & Auth connected successfully to new server!");
+  // Fetch provisioned Firebase Configuration securely from backend
+  try {
+    const res = await fetch('/api/firebase-config');
+    const firebaseConfig = await res.json();
+    
+    // Firebase initialization with Firestore & Auth
+    const app = initializeApp(firebaseConfig);
+    // Support both default database and customized firestore database ID
+    try {
+      window.db = getFirestore(app, firebaseConfig.databaseId || "ai-studio-ddinvoicemanagem-bc53b9da-08cd-49d1-83b1-35cf8c6f861c");
+    } catch(e) {
+      window.db = getFirestore(app);
+    }
+    window.auth = getAuth(app);
+    window.firestore = { doc, getDoc, setDoc, onSnapshot };
+    
+    window.firebaseAuth = {
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut
+    };
+    
+    window.dispatchEvent(new CustomEvent('firebase-ready'));
+    console.log("⚡ Firebase Cloud Real-time Database connected successfully!");
+  } catch(e) {
+    console.error("Failed to load Firebase configuration", e);
+  }
 </script>
 
 <script src="js/script.js"></script>

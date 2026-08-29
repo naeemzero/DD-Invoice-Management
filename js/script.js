@@ -59,7 +59,7 @@ const SEED_MEMBERS = [
 ];
 
 /* ═══════════════════════════════════════════
-   STORAGE MODULE (Cloud + Local Sync Version)
+   STORAGE MODULE (Real-Time Cloud Firestore + Local Fallback)
 ═══════════════════════════════════════════ */
 const StorageModule = {
   // মেমোরি ক্যাশ (অ্যাপ ফাস্ট রাখার জন্য)
@@ -69,10 +69,12 @@ const StorageModule = {
     settings: null,
     creds: {}
   },
+  _listenersBound: false,
+  _isInitialSyncDone: false,
 
   // ১. অ্যাপ চালুর সময় ক্লাউড থেকে সব ডেটা নিয়ে আসবে, ফেইল করলে লোকাল স্টোরেজ থেকে লোড করবে
   async loadFromCloud() {
-    // First load from localStorage for instant display
+    // First load from localStorage for instant offline/initial display
     try {
       const localM = localStorage.getItem(LS.MEMBERS);
       this._data.members = localM ? JSON.parse(localM) : SEED_MEMBERS;
@@ -89,24 +91,107 @@ const StorageModule = {
       this._data.creds = {};
     }
 
-    try {
-      if (window.firestore && window.db) {
-        const { doc, getDoc } = window.firestore;
+    // Connect real-time live listener from Firebase Firestore
+    this.listenToRealtimeChanges();
+  },
+
+  // Real-time listener: whenever ANY user/admin changes data, this automatically syncs to all connected users
+  listenToRealtimeChanges() {
+    if (this._listenersBound) return;
+    
+    const attachListener = () => {
+      if (!window.firestore || !window.db) return false;
+      
+      try {
+        const { doc, onSnapshot } = window.firestore;
         const ref = doc(window.db, "dd_cms", "main_data");
-        const snap = await getDoc(ref);
-        
-        if (snap.exists()) {
-          const cloudData = snap.data();
-          if (cloudData) {
-            this._data = { ...this._data, ...cloudData };
-            this._persistLocal();
+
+        this.setSyncStatus(true, 'Connecting…');
+        onSnapshot(ref, (snap) => {
+          this.setSyncStatus(false, 'Live Sync Active');
+          if (snap.exists()) {
+            const cloudData = snap.data();
+            if (cloudData) {
+              const prevDataJson = JSON.stringify(this._data);
+              this._data = {
+                members: cloudData.members || this._data.members || SEED_MEMBERS,
+                invoices: cloudData.invoices || this._data.invoices || [],
+                settings: cloudData.settings || this._data.settings || DEFAULT_SETTINGS,
+                creds: cloudData.creds || this._data.creds || {}
+              };
+              this._persistLocal();
+
+              // If data changed after initial load, trigger live UI refresh across all views
+              if (this._isInitialSyncDone && prevDataJson !== JSON.stringify(this._data)) {
+                this.onLiveUpdate();
+              }
+              this._isInitialSyncDone = true;
+            }
+          } else {
+            // First time bootstrapping data in cloud Firestore
+            this.saveToCloud();
+            this._isInitialSyncDone = true;
           }
-        } else {
-          await this.saveToCloud();
+        }, (err) => {
+          console.warn("Real-time listener notice:", err);
+          this.setSyncStatus(false, 'Offline (Local)');
+        });
+
+        this._listenersBound = true;
+        return true;
+      } catch(e) {
+        console.warn("Could not bind real-time snapshot listener:", e);
+        return false;
+      }
+    };
+
+    if (!attachListener()) {
+      window.addEventListener('firebase-ready', () => {
+        attachListener();
+      }, { once: true });
+    }
+  },
+
+  setSyncStatus(isSyncing, label) {
+    const indicators = [el('admin-sync-indicator'), el('mp-sync-indicator')];
+    indicators.forEach(ind => {
+      if (!ind) return;
+      ind.classList.toggle('syncing', isSyncing);
+      const span = ind.querySelector('span:not(.cloud-live-dot)');
+      if (span && label) span.textContent = label;
+    });
+  },
+
+  onLiveUpdate() {
+    console.log("⚡ Live update received from Firestore! Refreshing views...");
+    try {
+      // 1. If in Admin mode:
+      if (AuthModule.isLoggedIn()) {
+        if (typeof DashboardModule !== 'undefined' && DashboardModule.refresh) DashboardModule.refresh();
+        if (typeof MemberModule !== 'undefined' && MemberModule.render) MemberModule.render();
+        if (typeof LedgerModule !== 'undefined' && LedgerModule.render) LedgerModule.render();
+        if (typeof InvoiceModule !== 'undefined' && InvoiceModule.renderHistory) InvoiceModule.renderHistory();
+        if (typeof SettingsModule !== 'undefined' && SettingsModule.load) SettingsModule.load();
+      }
+
+      // 2. If in Member Portal mode:
+      const mSess = MemberPortalAuth.getSession();
+      if (mSess && typeof MemberPortalModule !== 'undefined') {
+        MemberPortalModule._m = this.getMembers().find(m => m.member_id === mSess.member_id);
+        if (MemberPortalModule._m) {
+          MemberPortalModule.refreshAll();
+          MemberPortalModule._applyBranding();
         }
       }
-    } catch (e) {
-      console.warn("Cloud load fallback active (using local storage):", e);
+
+      // 3. Update topbar branding
+      const s = this.getSettings();
+      const orgN = el('sidebar-org-name'); if (orgN) orgN.textContent = s.org_name || 'Dream Development';
+      const authN = el('auth-org-name'); if (authN) authN.textContent = s.org_name || 'Dream Development DD';
+
+      UIModule.toast("⚡ Live update synced from cloud!", "info");
+    } catch(e) {
+      console.warn("Live UI refresh handled with error:", e);
     }
   },
 
@@ -121,17 +206,22 @@ const StorageModule = {
     }
   },
 
-  // ২. ক্লাউডে ও লোকালে ডেটা সেভ করবে
+  // ২. ক্লাউডে ও লোকালে ডেটা সেভ করবে (রিয়েলটাইমে সাথে সাথে সব ক্লায়েন্টে চলে যাবে)
   async saveToCloud() {
     this._persistLocal();
+    this.setSyncStatus(true, 'Syncing…');
     try {
       if (window.firestore && window.db) {
         const { doc, setDoc } = window.firestore;
         const ref = doc(window.db, "dd_cms", "main_data");
         await setDoc(ref, this._data);
+        this.setSyncStatus(false, 'Live Sync Active');
+      } else {
+        this.setSyncStatus(false, 'Local Active');
       }
     } catch (e) {
       console.warn("Cloud save warning (saved locally):", e);
+      this.setSyncStatus(false, 'Local Backup');
     }
   },
 
@@ -143,7 +233,7 @@ const StorageModule = {
   hasMemberAccount(id) { return !!this.getMemberCreds()[id]; },
   peekInvoiceNum() { return this.getSettings().inv_number || 10154; },
 
-  // ডেটা সেভ করার ফাংশনগুলো (লোকাল ক্যাশ আপডেট + ক্লাউড সিঙ্ক)
+  // ডেটা সেভ করার ফাংশনগুলো (লোকাল ক্যাশ আপডেট + ক্লাউড রিয়েলটাইম সিঙ্ক)
   setMembers(d) { this._data.members = d; this.saveToCloud(); return true; },
   setInvoices(d) { this._data.invoices = d; this.saveToCloud(); return true; },
   setSettings(d) { this._data.settings = d; this.saveToCloud(); return true; },
@@ -1887,16 +1977,6 @@ const App = {
 
   _initAuthListeners(){
     /* Tab switching */
-    document.querySelectorAll('.auth-tab').forEach(tab=>{
-      tab.addEventListener('click',()=>{
-        document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        const w=tab.dataset.tab;
-        el('auth-admin-panel').classList.toggle('hidden',w!=='admin');
-        el('auth-member-panel').classList.toggle('hidden',w!=='member');
-        setTimeout(()=>(w==='admin'?el('login-pwd'):el('member-login-id'))?.focus(),50);
-      });
-    });
     setTimeout(()=>el('login-pwd')?.focus(),280);
 
     /* Eye toggles */
