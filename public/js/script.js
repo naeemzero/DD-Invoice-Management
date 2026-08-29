@@ -214,6 +214,11 @@ const StorageModule = {
       if (window.firestore && window.db) {
         const { doc, setDoc } = window.firestore;
         const ref = doc(window.db, "dd_cms", "main_data");
+        // Measure size
+        const payloadSize = new Blob([JSON.stringify(this._data)]).size;
+        if (payloadSize > 800000) {
+          console.warn("Payload size is getting dangerously large:", payloadSize);
+        }
         await setDoc(ref, this._data);
         this.setSyncStatus(false, 'Live Sync Active');
       } else {
@@ -1828,6 +1833,26 @@ const MemberProfileModule = {
     });
   },
 
+  loginAsMember() {
+    MemberPortalModule.init({ member_id: this._id, name: el('profile-display-name').textContent });
+    UIModule.closeModal('member-profile-modal');
+    el('sidebar').style.display='none';
+    document.querySelector('.main-wrapper').style.display='none';
+    el('member-portal').style.display='flex';
+  },
+  async setupPortal() {
+    const pwd = prompt('Enter a new password for this member (min 6 chars):');
+    if (!pwd) return;
+    if (pwd.length < 6) { UIModule.toast('Password too short','error'); return; }
+    const res = await MemberPortalAuth.createAccount(this._id, pwd);
+    if (res.ok) {
+      UIModule.toast('Portal created!', 'success');
+      this.open(this._id);
+      MemberModule.renderTable();
+    } else {
+      UIModule.toast(res.msg, 'error');
+    }
+  },
   open(memberId){
     const m=StorageModule.getMembers().find(x=>x.member_id===memberId); if(!m)return;
     this._id=memberId;
@@ -1838,8 +1863,8 @@ const MemberProfileModule = {
     // Portal account badge
     const has=StorageModule.hasMemberAccount(memberId);
     el('profile-account-badge').innerHTML=has
-      ?'<span class="portal-badge-active"><i class="fas fa-circle-check"></i> Portal Active</span>'
-      :'<span class="portal-badge-none"><i class="fas fa-circle-minus"></i> No Portal Account</span>';
+      ?'<span class="portal-badge-active" style="margin-right:8px;"><i class="fas fa-circle-check"></i> Portal Active</span><button class="btn btn-sm btn-outline" onclick="MemberProfileModule.loginAsMember()">Login as Member</button>'
+      :'<span class="portal-badge-none" style="margin-right:8px;"><i class="fas fa-circle-minus"></i> No Portal Account</span><button class="btn btn-sm btn-primary" onclick="MemberProfileModule.setupPortal()">Create Portal</button>';
 
     // Photo
     this._showImg('profile-photo-display','profile-photo-placeholder',m.photo,null);
@@ -1906,6 +1931,10 @@ const MemberProfileModule = {
       nominee_name:  el('pf-nominee-name').value.trim(),
       nominee_relation:el('pf-nominee-relation').value,
       nominee_nid_number:el('pf-nominee-nid').value.trim(),
+      photo: ex.photo || null,
+      nid_image: ex.nid_image || null,
+      nominee_photo: ex.nominee_photo || null,
+      nominee_nid_image: ex.nominee_nid_image || null,
     };
     StorageModule.setMembers(mems);
     UIModule.closeModal('member-profile-modal');
