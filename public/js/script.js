@@ -448,6 +448,28 @@ const Utils = {
   uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);},
   esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));},
 
+  compressImage(file, maxWidth=800, quality=0.7){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+          const canvas=document.createElement('canvas');
+          let w=img.width, h=img.height;
+          if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
+          canvas.width=w; canvas.height=h;
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL('image/jpeg',quality));
+        };
+        img.onerror=err=>reject(err);
+        img.src=e.target.result;
+      };
+      reader.onerror=err=>reject(err);
+      reader.readAsDataURL(file);
+    });
+  },
+
   numToWords(n){
     const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
     const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
@@ -1427,13 +1449,18 @@ const SettingsModule = {
   },
   _bindUpload(zoneId,inputId,imgId,phId,btnId,settingKey,sideLogoId,sideInitId){
     el(zoneId)?.addEventListener('click',()=>el(inputId)?.click());
-    el(inputId)?.addEventListener('change',e=>{
+    el(inputId)?.addEventListener('change',async e=>{
       const f=e.target.files[0]; if(!f)return;
-      if(f.size>2*1024*1024){UIModule.toast('File too large (max 2MB).','error');return;}
-      const r=new FileReader(); r.onload=ev=>{
-        const b64=ev.target.result; const s=StorageModule.getSettings(); s[settingKey]=b64; StorageModule.setSettings(s);
+      if(f.size>5*1024*1024){UIModule.toast('File too large (max 5MB).','error');return;}
+      UIModule.toast('Optimizing and saving...','info');
+      try {
+        const b64 = await Utils.compressImage(f, 800, 0.7);
+        const s=StorageModule.getSettings(); s[settingKey]=b64; StorageModule.setSettings(s);
         this.load(); UIModule.toast('Saved.','success');
-      }; r.readAsDataURL(f); e.target.value='';
+      } catch(err) {
+        UIModule.toast('Failed to process image.','error');
+      }
+      e.target.value='';
     });
     el(btnId)?.addEventListener('click',()=>{
       UIModule.confirm('Remove Image','Remove this image?',()=>{
@@ -1931,9 +1958,15 @@ const MemberProfileModule = {
     mems[idx][field]=val; StorageModule.setMembers(mems);
   },
 
-  _readImg(file,maxSize,cb){
-    if(file.size>maxSize){UIModule.toast(`File too large. Max ${Math.round(maxSize/1024)}KB.`,'error');return;}
-    const r=new FileReader(); r.onload=e=>cb(e.target.result); r.readAsDataURL(file);
+  async _readImg(file,maxSize,cb){
+    if(file.size>5*1024*1024){UIModule.toast(`File too large. Max 5MB.`,'error');return;}
+    UIModule.toast('Optimizing...','info');
+    try {
+      const b64 = await Utils.compressImage(file, 600, 0.7);
+      cb(b64);
+    } catch(err) {
+      UIModule.toast('Image processing failed.','error');
+    }
   },
 };
 
