@@ -327,7 +327,12 @@ const AuthModule = {
         }
       } catch(e){}
       sessionStorage.removeItem(this.SK);
-      location.reload();
+      el('sidebar').style.display='none';
+      document.querySelector('.main-wrapper').style.display='none';
+      el('auth-screen').style.display='flex';
+      el('auth-screen').style.opacity='1';
+      const pwdInp=el('login-pwd'); if(pwdInp){pwdInp.value='';}
+
     },{danger:false,icon:'fas fa-right-from-bracket'});
   }
 };
@@ -1687,11 +1692,15 @@ const MemberPortalModule = {
   init(session){
     this._id = session.member_id;
     this._m  = StorageModule.getMembers().find(m=>m.member_id===session.member_id);
-    if(!this._m){ MemberPortalAuth.logout(); location.reload(); return; }
+    if(!this._m){ MemberPortalAuth.logout();
+        el('member-portal').style.display='none';
+        el('auth-screen').style.display='flex';
+        el('auth-screen').style.opacity='1';
+        const pwdInp=el('member-login-pwd'); if(pwdInp){pwdInp.value='';}
+ return; }
 
     this._applyBranding();
-    this._bindNav();
-    this._bindActions();
+    if(!this._isBooted){ this._bindNav(); this._bindActions(); this._isBooted=true; }
     this.refreshAll();
 
     el('member-portal').style.display = 'flex';
@@ -1724,7 +1733,12 @@ const MemberPortalModule = {
     // Logout
     el('mp-logout-btn')?.addEventListener('click',()=>{
       if(confirm('Sign out of Member Portal?')){
-        MemberPortalAuth.logout(); location.reload();
+        MemberPortalAuth.logout();
+        el('member-portal').style.display='none';
+        el('auth-screen').style.display='flex';
+        el('auth-screen').style.opacity='1';
+        const pwdInp=el('member-login-pwd'); if(pwdInp){pwdInp.value='';}
+
       }
     });
     // Theme toggle
@@ -2176,7 +2190,13 @@ const App = {
     setTimeout(()=>{ scr.style.display='none'; scr.style.opacity=''; cb(); },320);
   },
 
+  _isBooted: false,
   async _bootAdmin(){
+    if(this._isBooted) {
+      if(typeof DashboardModule !== 'undefined' && DashboardModule.refresh) DashboardModule.refresh();
+      return;
+    }
+    this._isBooted = true;
     MemberModule.init();
     InvoiceModule.init();
     SettingsModule.init();
