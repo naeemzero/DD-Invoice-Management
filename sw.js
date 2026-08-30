@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dd-cms-v2';
+const CACHE_NAME = 'dd-cms-v3';
 const ASSETS = [
   './',
   './index.html',
