@@ -548,6 +548,9 @@ const UIModule = {
   },
   openSidebar(){el('sidebar').classList.add('open');el('sidebar-overlay')?.classList.add('active');document.body.style.overflow='hidden';},
   closeSidebar(){el('sidebar').classList.remove('open');el('sidebar-overlay')?.classList.remove('active');document.body.style.overflow='';},
+  
+  
+
   _setupTheme(){
     const t=localStorage.getItem('dd_theme')||'light';
     this._applyTheme(t);
@@ -1527,7 +1530,7 @@ const PWAModule = {
     
     // Register service worker with detailed logging
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('js/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(reg => {
           console.log('%c✅ Service Worker registered','color:#0F766E;font-weight:bold');
           this._checkInstallable();
@@ -1538,6 +1541,10 @@ const PWAModule = {
     }
     
     // Capture install prompt
+    const isIos = /ipad|iphone|ipod/.test(navigator.userAgent.toLowerCase()) && !window.MSStream;
+    if(isIos && !(window.navigator.standalone === true)) {
+      setTimeout(() => this._banner(), 2000);
+    }
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       this._p = e;

@@ -7,11 +7,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="DD CMS"/>
   <link rel="manifest" href="json/manifest.json"/>
+  <link rel="apple-touch-icon" href="icon/icon-192.png">
   <title>DD CMS — Dream Development</title>
+  
+    <!-- Fonts for Theme Options -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 </head>
 <body>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
 <!-- ════════════════════════════════════════
      AUTH SCREEN
@@ -344,6 +351,7 @@
     <button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button>
     <h1 class="page-title" id="page-title">Dashboard</h1>
     <div class="topbar-actions">
+      
       <div id="admin-sync-indicator" class="cloud-live-pill" title="Real-time Live Sync Connected">
         <span class="cloud-live-dot"></span> <span>Live Sync</span>
       </div>

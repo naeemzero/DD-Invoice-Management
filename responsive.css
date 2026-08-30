@@ -1,0 +1,75 @@
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 900px) {
+  #sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: var(--sh-lg);
+  }
+  #sidebar.open {
+    left: 0;
+  }
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+  .topbar {
+    left: 0 !important;
+    padding-left: 16px;
+    justify-content: space-between;
+  }
+  .hamburger-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: var(--txt-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+  .topbar-title {
+    display: flex;
+    align-items: center;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 800px;
+  }
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .auth-split {
+    flex-direction: column;
+  }
+  .auth-split-left, .auth-split-right {
+    width: 100%;
+    padding: 24px;
+  }
+  .auth-split-right {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .modal-box {
+    width: 95%;
+    max-width: none;
+    padding: 16px;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+@media (min-width: 901px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+}
