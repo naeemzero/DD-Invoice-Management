@@ -546,7 +546,15 @@ const UIModule = {
     el('sidebar-close-btn')?.addEventListener('click',()=>this.closeSidebar());
     el('sidebar-overlay')?.addEventListener('click',()=>this.closeSidebar());
   },
-  openSidebar(){el('sidebar').classList.add('open');el('sidebar-overlay')?.classList.add('active');document.body.style.overflow='hidden';},
+  openSidebar(){
+    if(window.innerWidth <= 900) {
+      el('sidebar').classList.add('open');
+      el('sidebar-overlay')?.classList.add('active');
+      document.body.style.overflow='hidden';
+    } else {
+      document.body.classList.toggle('sidebar-collapsed');
+    }
+  },
   closeSidebar(){el('sidebar').classList.remove('open');el('sidebar-overlay')?.classList.remove('active');document.body.style.overflow='';},
   
   
