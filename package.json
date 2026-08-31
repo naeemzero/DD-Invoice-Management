@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "mkdir -p public && cp -r css js json icon sw.js index.html public/ 2>/dev/null || true",
+    "build": "mkdir -p public && cp -r css js json assets sw.js index.html public/ 2>/dev/null || true",
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 0",
     "lint": "echo \"No linting required\" && exit 0"
