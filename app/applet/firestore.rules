@@ -1,0 +1,154 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════
+// DD CMS — Firestore Security Rules
+//
+// HOW TO DEPLOY (one-time):
+//   1. Firebase Console → your project → Firestore Database
+//      → if you haven't already, click "Create database" (any region is
+//        fine — choose one close to Bangladesh, e.g. asia-south1/Mumbai)
+//   2. Firestore Database → Rules tab → delete everything there →
+//      paste this ENTIRE file → click Publish
+//
+// This is almost certainly why your data wasn't syncing before: a fresh
+// Firestore project has no rules published yet (or defaults to deny-all
+// "locked mode"). These rules explicitly allow exactly what the app
+// needs and nothing else.
+// ═══════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn(){ return request.auth != null; }
+
+    function isAdmin(){
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // True when the signed-in user's own Firebase Auth email matches the
+    // synthetic pattern for this member id + generation. The generation
+    // number lets an admin invalidate a lost/forgotten member password
+    // (by bumping it) without needing a backend to delete the old account.
+    function isSelfMemberEmail(memberId, gen){
+      return isSignedIn() &&
+        request.auth.token.email == memberId.lower() + '.g' + string(gen) + '@ddcms.internal';
+    }
+
+    function isOwnMemberDoc(memberId){
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/members/$(memberId)).data.auth_uid == request.auth.uid;
+    }
+
+    // One-time self-service bootstrap flag: lets the very first person who
+    // opens the app create the one admin account, in-app. Can only flip
+    // false → true, and only once — never reset, never written back to false.
+    match /system/setup {
+      allow read: if true;
+      allow create, update: if isSignedIn()
+        && request.resource.data.adminExists == true
+        && (resource == null || resource.data.adminExists != true);
+    }
+
+    // Admin registry. A user may create ONLY their own admin doc, and only
+    // while bootstrap hasn't completed yet (blocks anyone from granting
+    // themselves admin after the org is already set up).
+    match /admins/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && !exists(/databases/$(database)/documents/system/setup);
+      allow update, delete: if isAdmin();
+    }
+
+    // Org settings: public read (auth screen branding, invoice numbering,
+    // receivers list), admin-only write.
+    match /settings/main {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Minimal public-read lookup so a member can construct their own login
+    // email before they're authenticated. Contains no personal data — just
+    // a generation counter and a yes/no "account created" flag.
+    match /memberAuthLookup/{memberId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && isSelfMemberEmail(memberId, resource.data.auth_gen)
+            && resource.data.has_account == false
+            && request.resource.data.has_account == true
+            && request.resource.data.auth_gen == resource.data.auth_gen);
+      allow delete: if isAdmin();
+    }
+
+    // Member profiles. Admin: full access. A member may only READ their own
+    // document. They may self-UPDATE in two narrow cases: (a) linking their
+    // own auth_uid the first time they create a portal account, or (b) any
+    // time after, changing only their own photo — nothing else about their
+    // profile is self-editable, admin manages the rest.
+    match /members/{memberId} {
+      allow read: if isAdmin() || isOwnMemberDoc(memberId);
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && isSelfMemberEmail(memberId, resource.data.auth_gen)
+            && resource.data.auth_uid == null
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['auth_uid','auth_gen','updated_at','last_login_at']))
+        || (isOwnMemberDoc(memberId)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['photo_url','last_login_at','updated_at']));
+    }
+
+    // Nominee change requests: a member may create/read only their own;
+    // never update/delete their own (that would defeat the review step).
+    // Admin reviews and applies the change by editing the member doc itself.
+    match /nomineeRequests/{reqId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource != null && isOwnMemberDoc(resource.data.member_id));
+      allow create: if isSignedIn()
+        && isOwnMemberDoc(request.resource.data.member_id)
+        && request.resource.data.status == 'pending';
+      allow update, delete: if isAdmin();
+    }
+
+    // Membership join requests: submitted by people who are not members
+    // yet, so this must be writable while signed out. Narrow on purpose —
+    // create-only, must start 'pending', never publicly readable.
+    match /joinRequests/{reqId} {
+      allow create: if request.resource.data.status == 'pending';
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Invoices: admin full access; a member may read only invoices that
+    // are theirs.
+    match /invoices/{invoiceId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && isOwnMemberDoc(resource.data.member_id));
+      allow write: if isAdmin();
+    }
+
+    // Fines: same per-member read restriction as invoices.
+    match /fines/{fineId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && isOwnMemberDoc(resource.data.member_id));
+      allow write: if isAdmin();
+    }
+
+    // Org-wide financial collections: any signed-in member may READ (needed
+    // for the Fund Balance / Total Investment figures shown in their
+    // portal) but never write. Admin has full access.
+    match /costs/{docId}                 { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /fixedCosts/{docId}            { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /fixedCostPayments/{docId}     { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /investments/{docId}           { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /investmentProfits/{docId}     { allow read: if isSignedIn(); allow write: if isAdmin(); }
+    match /investmentWithdrawals/{docId} { allow read: if isSignedIn(); allow write: if isAdmin(); }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

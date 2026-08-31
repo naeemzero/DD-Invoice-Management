@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#0F766E"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="DD CMS"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="description" content="Dream Development — Member Contribution, Fund &amp; Investment Management System"/>
+  <link rel="manifest" href="json/manifest.json"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png"/>
+  <link rel="icon" href="assets/favicon.ico"/>
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png"/>
+  <title>DD CMS — Dream Development</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-logo-box">
+        <img id="auth-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain"/>
+        <span id="auth-logo-text">DD</span>
+      </div>
+      <h1 id="auth-org-name">Dream Development DD</h1>
+      <p class="auth-tagline">Contribution &amp; Investment Management System</p>
+    </div>
+
+    <!-- First-run only: create the one admin account, in-app, no console step needed -->
+    <div id="admin-bootstrap-panel" class="hidden">
+      <div class="auth-notice"><i class="fas fa-circle-info"></i> First time setup — create the admin account for this organization.</div>
+      <form id="bootstrap-form" novalidate>
+        <div class="form-group">
+          <label class="form-label">Admin Email <span class="req">*</span></label>
+          <input type="email" id="bootstrap-email" class="form-control" placeholder="you@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password <span class="req">*</span></label>
+          <div class="pwd-input-wrap">
+            <input type="password" id="bootstrap-pwd" class="form-control" placeholder="Min 6 characters" required/>
+            <button type="button" class="pwd-eye" data-for="bootstrap-pwd"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password <span class="req">*</span></label>
+          <input type="password" id="bootstrap-pwd2" class="form-control" placeholder="Re-enter password" required/>
+        </div>
+        <div id="bootstrap-err" class="auth-error hidden"></div>
+        <button type="submit" class="btn btn-primary auth-submit-btn" id="bootstrap-submit-btn">
+          <i class="fas fa-user-shield"></i> Create Admin Account
+        </button>
+      </form>
+    </div>
+
+    <div id="normal-auth-panel" class="hidden">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-authtab="admin"><i class="fas fa-shield-halved"></i> Admin</button>
+        <button class="auth-tab" data-authtab="member"><i class="fas fa-user-circle"></i> Member Portal</button>
+      </div>
+
+      <div id="auth-panel-admin" class="auth-tab-panel">
+        <form id="admin-login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label">Admin Email</label>
+            <input type="email" id="admin-email-input" class="form-control" placeholder="you@example.com"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="pwd-input-wrap">
+              <input type="password" id="admin-pwd-input" class="form-control" placeholder="Enter admin password"/>
+              <button type="button" class="pwd-eye" data-for="admin-pwd-input"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+          <div id="admin-login-err" class="auth-error hidden"><i class="fas fa-circle-xmark"></i> Incorrect password.</div>
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="admin-login-btn">
+            <i class="fas fa-right-to-bracket"></i> Sign In
+          </button>
+        </form>
+      </div>
+
+      <div id="auth-panel-member" class="auth-tab-panel hidden">
+        <form id="member-login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label">Member ID</label>
+            <input type="text" id="member-id-input" class="form-control" placeholder="e.g. DD-001"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="pwd-input-wrap">
+              <input type="password" id="member-pwd-input" class="form-control" placeholder="Enter your password"/>
+              <button type="button" class="pwd-eye" data-for="member-pwd-input"><i class="fas fa-eye"></i></button>
+            </div>
+          </div>
+          <div id="member-login-err" class="auth-error hidden"></div>
+          <button type="submit" class="btn btn-primary auth-submit-btn" id="member-login-btn">
+            <i class="fas fa-right-to-bracket"></i> Member Sign In
+          </button>
+        </form>
+        <div class="auth-aux">
+          <button type="button" class="text-link" id="create-account-link">
+            <i class="fas fa-user-plus"></i> No account yet? Create one
+          </button>
+          <div style="margin-top:8px">
+            <button type="button" class="text-link" id="open-join-request-btn">
+              <i class="fas fa-file-signature"></i> Want to join? Apply for membership
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="auth-footer-note">Dream Development DD &copy; 2026</p>
+  </div>
+</div>
+
+<!-- Membership Join Request Modal (public — no login required) -->
+<div id="join-request-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <h3><i class="fas fa-file-signature"></i> Apply for Membership</h3>
+      <button class="icon-btn" data-close="join-request-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="join-request-success" class="auth-notice hidden" style="background:var(--c-teal-bg)">
+        <i class="fas fa-circle-check"></i>
+        <div>Application submitted! The admin will review it and, once approved, will give you your official Member ID so you can sign in and set your own password.</div>
+      </div>
+      <form id="join-request-form" novalidate>
+        <p class="fld-hint" style="margin-top:0">Fill in your details below. Once approved by the admin, you'll receive a Member ID to sign in with.</p>
+
+        <div class="reg-section-title" style="margin-top:0">Basic Information</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label><input type="text" id="jr-name" class="form-control" required/></div>
+          <div class="form-group"><label class="form-label">Mobile Number <span class="req">*</span></label><input type="text" id="jr-mobile" class="form-control" required/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Father's Name</label><input type="text" id="jr-father" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Mother's Name</label><input type="text" id="jr-mother" class="form-control"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" id="jr-birthdate" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Blood Group</label>
+            <select id="jr-blood" class="form-control"><option value="">Select</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">National ID Number</label><input type="text" id="jr-nid" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Present Address</label><textarea id="jr-present-addr" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">Permanent Address</label><textarea id="jr-permanent-addr" class="form-control" rows="2"></textarea></div>
+
+        <div class="reg-section-title">Documents</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Your Photo</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-photo-input').click()">
+              <img id="jr-photo-preview" src="" alt="" style="display:none;max-height:100px;border-radius:8px"/>
+              <div id="jr-photo-ph"><i class="fas fa-user-circle"></i><span>Upload photo</span></div>
+              <input type="file" id="jr-photo-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Signature</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-signature-input').click()">
+              <img id="jr-signature-preview" src="" alt="" style="display:none;max-height:70px"/>
+              <div id="jr-signature-ph"><i class="fas fa-signature"></i><span>Upload signature</span></div>
+              <input type="file" id="jr-signature-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">NID — Front</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-nidfront-input').click()">
+              <img id="jr-nidfront-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="jr-nidfront-ph"><i class="fas fa-id-card"></i><span>NID front</span></div>
+              <input type="file" id="jr-nidfront-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">NID — Back</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-nidback-input').click()">
+              <img id="jr-nidback-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="jr-nidback-ph"><i class="fas fa-id-card"></i><span>NID back</span></div>
+              <input type="file" id="jr-nidback-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="reg-section-title">Nominee Information</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nominee Name</label><input type="text" id="jr-nominee-name" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Relation</label>
+            <select id="jr-nominee-relation" class="form-control"><option value="">Select</option>
+              <option>Father</option><option>Mother</option><option>Spouse</option><option>Son</option>
+              <option>Daughter</option><option>Brother</option><option>Sister</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Nominee NID Number</label><input type="text" id="jr-nominee-nid" class="form-control"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nominee Photo</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-nominee-photo-input').click()">
+              <img id="jr-nominee-photo-preview" src="" alt="" style="display:none;max-height:100px;border-radius:8px"/>
+              <div id="jr-nominee-photo-ph"><i class="fas fa-user"></i><span>Nominee photo</span></div>
+              <input type="file" id="jr-nominee-photo-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nominee NID — Front</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-nominee-nidfront-input').click()">
+              <img id="jr-nominee-nidfront-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="jr-nominee-nidfront-ph"><i class="fas fa-id-card"></i><span>NID front</span></div>
+              <input type="file" id="jr-nominee-nidfront-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Nominee NID — Back</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('jr-nominee-nidback-input').click()">
+              <img id="jr-nominee-nidback-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="jr-nominee-nidback-ph"><i class="fas fa-id-card"></i><span>NID back</span></div>
+              <input type="file" id="jr-nominee-nidback-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+
+        <div id="join-request-err" class="auth-error hidden"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="join-request-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="join-request-submit-btn"><i class="fas fa-paper-plane"></i> Submit Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Member Account Setup Modal -->
+<div id="member-setup-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3><i class="fas fa-user-plus"></i> Create Member Account</h3>
+      <button class="icon-btn" data-close="member-setup-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-notice"><i class="fas fa-info-circle"></i> Your admin must have added your Member ID first. Enter it below to set your portal password.</div>
+      <div class="form-group">
+        <label class="form-label">Your Member ID <span class="req">*</span></label>
+        <input type="text" id="setup-member-id" class="form-control" placeholder="e.g. DD-001"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password <span class="req">*</span></label>
+        <div class="pwd-input-wrap">
+          <input type="password" id="setup-member-pwd" class="form-control" placeholder="Min 6 characters"/>
+          <button type="button" class="pwd-eye" data-for="setup-member-pwd"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password <span class="req">*</span></label>
+        <div class="pwd-input-wrap">
+          <input type="password" id="setup-member-pwd2" class="form-control" placeholder="Re-enter password"/>
+          <button type="button" class="pwd-eye" data-for="setup-member-pwd2"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <div id="member-setup-error" class="auth-error hidden"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" data-close="member-setup-modal">Cancel</button>
+        <button class="btn btn-primary" id="create-account-btn"><i class="fas fa-check"></i> Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MEMBER PORTAL
+════════════════════════════════════════ -->
+<div id="member-portal" class="member-portal">
+  <!-- Portal Header -->
+  <header class="mp-header">
+    <div class="mp-header-brand">
+      <div class="mp-logo-box">
+        <img id="mp-logo" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain"/>
+        <span id="mp-logo-text">DD</span>
+      </div>
+      <div>
+        <div class="mp-org-name" id="mp-org-name">Dream Development DD</div>
+        <div class="mp-org-tag">Member Portal</div>
+      </div>
+    </div>
+    <div class="mp-header-right">
+      <button class="mp-theme-btn" id="mp-theme-btn" title="Toggle theme"><i class="fas fa-moon"></i></button>
+      <div class="mp-user-info">
+        <span class="mp-user-name" id="mp-user-name">—</span>
+        <span class="mp-user-id" id="mp-user-id">—</span>
+      </div>
+      <button class="mp-logout-btn" id="mp-logout-btn" title="Sign out"><i class="fas fa-right-from-bracket"></i></button>
+    </div>
+  </header>
+
+  <!-- Portal Tab Nav -->
+  <nav class="mp-nav">
+    <button class="mp-nav-btn active" data-mp-view="mp-overview">
+      <i class="fas fa-house"></i><span>Overview</span>
+    </button>
+    <button class="mp-nav-btn" data-mp-view="mp-invoices">
+      <i class="fas fa-file-invoice"></i><span>My Invoices</span>
+    </button>
+    <button class="mp-nav-btn" data-mp-view="mp-profile-view">
+      <i class="fas fa-id-badge"></i><span>Profile</span>
+    </button>
+    <button class="mp-nav-btn" data-mp-view="mp-contact">
+      <i class="fas fa-headset"></i><span>Contact Admin</span>
+    </button>
+  </nav>
+
+  <!-- Portal Content -->
+  <main class="mp-content">
+
+    <!-- Overview -->
+    <section id="mp-overview" class="mp-view active">
+      <div class="mp-profile-card">
+        <div class="mp-profile-avatar">
+          <img id="mp-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%"/>
+          <span id="mp-avatar-initials">?</span>
+        </div>
+        <div class="mp-profile-info">
+          <div class="mp-profile-name" id="mp-profile-name">—</div>
+          <div class="mp-profile-id" id="mp-profile-id">—</div>
+          <div id="mp-profile-badge" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div id="mp-due-banner" class="mp-due-banner hidden"></div>
+      <div id="mp-fine-banner" class="mp-fine-banner hidden"></div>
+
+      <div class="mp-stats-grid">
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-total-contribution">&#2547;0</div>
+          <div class="mp-stat-lbl">Total Contribution</div>
+        </div>
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-monthly-rate">&#2547;0</div>
+          <div class="mp-stat-lbl">Monthly Rate</div>
+        </div>
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-total-payments">0</div>
+          <div class="mp-stat-lbl">Payments Made</div>
+        </div>
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-last-payment">—</div>
+          <div class="mp-stat-lbl">Last Paid Period</div>
+        </div>
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-stat-fund">&#2547;0</div>
+          <div class="mp-stat-lbl">Organization Fund</div>
+        </div>
+        <div class="mp-stat">
+          <div class="mp-stat-val" id="mp-stat-invest">&#2547;0</div>
+          <div class="mp-stat-lbl">Total Investment</div>
+        </div>
+      </div>
+
+      <div class="mp-card">
+        <div class="mp-card-header">
+          <h3><i class="fas fa-clock-rotate-left"></i> Recent Payments</h3>
+          <button class="btn btn-outline btn-sm" data-mp-view="mp-invoices"><i class="fas fa-arrow-right"></i> All</button>
+        </div>
+        <div id="mp-recent-list"></div>
+      </div>
+
+      <div class="mp-card">
+        <div class="mp-card-header"><h3><i class="fas fa-address-card"></i> My Information</h3></div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-info-item"><i class="fas fa-people-roof"></i><div><div class="mp-contact-info-label">Father's Name</div><div class="mp-contact-info-val" id="mp-info-father">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-phone"></i><div><div class="mp-contact-info-label">Mobile</div><div class="mp-contact-info-val" id="mp-info-mobile">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-location-dot"></i><div><div class="mp-contact-info-label">Present Address</div><div class="mp-contact-info-val" id="mp-info-present">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-house"></i><div><div class="mp-contact-info-label">Permanent Address</div><div class="mp-contact-info-val" id="mp-info-permanent">—</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Invoices -->
+    <section id="mp-invoices" class="mp-view">
+      <div class="mp-card">
+        <div class="mp-card-header">
+          <h3><i class="fas fa-file-invoice"></i> My Invoices</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr>
+              <th>Invoice #</th><th>Period</th><th>Amount</th><th>Date</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody id="mp-invoices-body">
+              <tr><td colspan="6" class="empty-state"><i class="fas fa-file-invoice"></i><br>No invoices yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile (self-service) -->
+    <section id="mp-profile-view" class="mp-view">
+      <div class="mp-card">
+        <div class="mp-profile-photo-edit">
+          <div class="mp-profile-photo-wrap">
+            <img id="mp-photo-display" src="" alt="" style="display:none"/>
+            <div id="mp-photo-placeholder"><i class="fas fa-user"></i></div>
+            <button type="button" class="profile-photo-edit-btn" onclick="document.getElementById('mp-photo-input').click()" title="Change Photo"><i class="fas fa-camera"></i></button>
+            <input type="file" id="mp-photo-input" accept="image/*" style="display:none"/>
+          </div>
+          <div>
+            <div class="mp-profile-name" id="mp-profile-view-name">—</div>
+            <div class="mp-profile-id" id="mp-profile-view-id">—</div>
+            <p class="fld-hint" style="margin:4px 0 0">Photo must be under 500KB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mp-card">
+        <div class="mp-card-header"><h3><i class="fas fa-clock"></i> Session</h3></div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-info-item"><i class="fas fa-right-to-bracket"></i><div><div class="mp-contact-info-label">Last / Current Login</div><div class="mp-contact-info-val" id="mp-login-date">—</div></div></div>
+        </div>
+      </div>
+
+      <div class="mp-card">
+        <div class="mp-card-header"><h3><i class="fas fa-address-card"></i> My Details</h3></div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-info-item"><i class="fas fa-people-roof"></i><div><div class="mp-contact-info-label">Father's Name</div><div class="mp-contact-info-val" id="mp-view-father">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-phone"></i><div><div class="mp-contact-info-label">Mobile</div><div class="mp-contact-info-val" id="mp-view-mobile">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-id-card"></i><div><div class="mp-contact-info-label">NID Number</div><div class="mp-contact-info-val" id="mp-view-nid">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-sack-dollar"></i><div><div class="mp-contact-info-label">Monthly Contribution</div><div class="mp-contact-info-val" id="mp-view-monthly">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-location-dot"></i><div><div class="mp-contact-info-label">Present Address</div><div class="mp-contact-info-val" id="mp-view-present">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-house"></i><div><div class="mp-contact-info-label">Permanent Address</div><div class="mp-contact-info-val" id="mp-view-permanent">—</div></div></div>
+        </div>
+        <p class="fld-hint">To correct any of these details, please contact the admin.</p>
+      </div>
+
+      <div class="mp-card">
+        <div class="mp-card-header"><h3><i class="fas fa-user-shield"></i> Nominee</h3></div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-info-item"><i class="fas fa-user"></i><div><div class="mp-contact-info-label">Name</div><div class="mp-contact-info-val" id="mp-view-nominee-name">—</div></div></div>
+          <div class="mp-contact-info-item"><i class="fas fa-heart"></i><div><div class="mp-contact-info-label">Relation</div><div class="mp-contact-info-val" id="mp-view-nominee-relation">—</div></div></div>
+        </div>
+        <div id="mp-nom-pending-note" class="auth-notice hidden" style="margin-top:10px"></div>
+        <button class="btn btn-outline btn-sm" id="mp-nom-request-btn" style="margin-top:10px"><i class="fas fa-pen"></i> Request Nominee Change</button>
+        <div id="mp-nom-form" class="hidden" style="margin-top:12px">
+          <div class="form-group"><label class="form-label">New Nominee Name</label><input type="text" id="mp-nom-name" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Relation</label>
+            <select id="mp-nom-relation" class="form-control"><option value="">Select</option>
+              <option>Father</option><option>Mother</option><option>Spouse</option><option>Son</option>
+              <option>Daughter</option><option>Brother</option><option>Sister</option><option>Other</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Nominee NID Number</label><input type="text" id="mp-nom-nid" class="form-control"/></div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline btn-sm" id="mp-nom-cancel-btn">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" id="mp-nom-submit-btn"><i class="fas fa-paper-plane"></i> Send Request</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="mp-download-profile-btn" style="width:100%"><i class="fas fa-file-pdf"></i> Download My Profile (PDF)</button>
+    </section>
+
+    <!-- Contact Admin -->
+    <section id="mp-contact" class="mp-view">
+      <div class="mp-contact-card">
+        <div class="mp-contact-header">
+          <i class="fas fa-headset"></i>
+          <h3>Contact Admin</h3>
+          <p>Need help with your invoices, contribution records, or membership? Reach out to the Dream Development team.</p>
+        </div>
+        <div id="mp-people-cards" class="mp-people-cards hidden"></div>
+        <div class="mp-contact-actions">
+          <a href="https://wa.me/8801775085540" target="_blank" rel="noopener" class="mp-contact-btn mp-whatsapp">
+            <i class="fab fa-whatsapp"></i>
+            <div>
+              <span class="mp-contact-label">WhatsApp</span>
+              <span class="mp-contact-val">+880 1775 085540</span>
+            </div>
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="mailto:dd.organization.bd@gmail.com" class="mp-contact-btn mp-email">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <span class="mp-contact-label">Email</span>
+              <span class="mp-contact-val">dd.organization.bd@gmail.com</span>
+            </div>
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+        <div class="mp-contact-info">
+          <div class="mp-contact-info-item">
+            <i class="fas fa-building"></i>
+            <div>
+              <div class="mp-contact-info-label">Organization</div>
+              <div class="mp-contact-info-val" id="mp-contact-org">Dream Development DD</div>
+            </div>
+          </div>
+          <div class="mp-contact-info-item">
+            <i class="fas fa-location-dot"></i>
+            <div>
+              <div class="mp-contact-info-label">Address</div>
+              <div class="mp-contact-info-val" id="mp-contact-addr">Dhaka, Bangladesh</div>
+            </div>
+          </div>
+          <div class="mp-contact-info-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <div class="mp-contact-info-label">Office Hours</div>
+              <div class="mp-contact-info-val">Sat – Thu &nbsp;|&nbsp; 9 AM – 6 PM</div>
+            </div>
+          </div>
+          <div class="mp-contact-info-item">
+            <i class="fas fa-shield-halved"></i>
+            <div>
+              <div class="mp-contact-info-label">Note</div>
+              <div class="mp-contact-info-val">Only admins can generate or delete invoices. Contact admin for corrections.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Member Invoice View Modal (portal) -->
+<div id="mp-invoice-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <h3><i class="fas fa-receipt"></i> Invoice</h3>
+      <div class="modal-head-acts">
+        <button class="btn btn-primary btn-sm" id="mp-modal-pdf-btn"><i class="fas fa-download"></i> Download PDF</button>
+        <button class="icon-btn" data-close="mp-invoice-modal"><i class="fas fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="modal-body inv-modal-body">
+      <div id="mp-invoice-print-area"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADMIN SIDEBAR
+════════════════════════════════════════ -->
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <div class="org-logo-wrap">
+      <img id="sidebar-logo" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain"/>
+      <span id="sidebar-initials" class="org-initials">DD</span>
+    </div>
+    <div class="org-info">
+      <h2 id="sidebar-org-name">Dream Development</h2>
+      <span class="org-tag">Admin Panel</span>
+    </div>
+    <button class="sidebar-close-btn" id="sidebar-close-btn"><i class="fas fa-times"></i></button>
+  </div>
+  <nav class="sidebar-nav">
+    <ul>
+      <li><a href="#" class="nav-link active" data-view="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+      <li><a href="#" class="nav-link" data-view="invoice"><i class="fas fa-file-invoice"></i><span>Generate Invoice</span></a></li>
+      <li><a href="#" class="nav-link" data-view="history"><i class="fas fa-clock-rotate-left"></i><span>Invoice History</span></a></li>
+      <li><a href="#" class="nav-link" data-view="ledger"><i class="fas fa-book-open"></i><span>Contribution Ledger</span></a></li>
+      <li><a href="#" class="nav-link" data-view="members"><i class="fas fa-users"></i><span>Members</span><span id="join-requests-badge" class="nav-badge hidden">0</span></a></li>
+      <li><a href="#" class="nav-link" data-view="costs"><i class="fas fa-chart-pie"></i><span>Cost &amp; Investment</span></a></li>
+      <li><a href="#" class="nav-link" data-view="settings"><i class="fas fa-sliders"></i><span>Settings</span></a></li>
+    </ul>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle-btn" id="theme-toggle"><i class="fas fa-moon"></i><span>Dark Mode</span></button>
+    <button class="logout-btn" id="logout-btn"><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>
+  </div>
+</aside>
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+<!-- ════════════════════════════════════════
+     ADMIN MAIN WRAPPER
+════════════════════════════════════════ -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button>
+    <h1 class="page-title" id="page-title">Dashboard</h1>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" data-view="invoice"><i class="fas fa-plus"></i><span>New Invoice</span></button>
+      <button class="icon-btn" id="topbar-theme-btn"><i class="fas fa-moon"></i></button>
+    </div>
+  </header>
+
+  <main class="content-area">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard-view" class="view active">
+      <div class="section-label"><i class="fas fa-vault"></i> Fund Overview</div>
+      <div class="stats-grid cols-3">
+        <div class="stat-card sc-primary"><div class="stat-icon"><i class="fas fa-sack-dollar"></i></div><div class="stat-body"><div class="stat-val" id="stat-fund-balance">&#2547;0</div><div class="stat-lbl">Current Fund Balance</div></div></div>
+        <div class="stat-card sc-success"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-body"><div class="stat-val" id="stat-total-collected">&#2547;0</div><div class="stat-lbl">Total Contributions Collected</div></div></div>
+        <div class="stat-card sc-info"><div class="stat-icon"><i class="fas fa-calendar-check"></i></div><div class="stat-body"><div class="stat-val" id="stat-this-month">&#2547;0</div><div class="stat-lbl">This Month</div></div></div>
+      </div>
+
+      <div class="section-label"><i class="fas fa-right-left"></i> Income &amp; Cost Breakdown</div>
+      <div class="income-cost-grid">
+        <div class="ic-col">
+          <div class="ic-col-head ic-in"><i class="fas fa-arrow-down"></i> Income Sources</div>
+          <div class="ic-row"><span>Monthly Contributions</span><strong id="stat-income-contrib">&#2547;0</strong></div>
+          <div class="ic-row"><span>Fines Collected</span><strong id="stat-income-fine">&#2547;0</strong></div>
+          <div class="ic-row"><span>Fixed-Cost Recovery</span><strong id="stat-income-fixedcost">&#2547;0</strong></div>
+          <div class="ic-row"><span>Investment Returns</span><strong id="stat-income-invest">&#2547;0</strong></div>
+        </div>
+        <div class="ic-col">
+          <div class="ic-col-head ic-out"><i class="fas fa-arrow-up"></i> Costs</div>
+          <div class="ic-row"><span>Operating Costs</span><strong id="stat-cost-op">&#2547;0</strong></div>
+          <div class="ic-row"><span>Fixed Costs</span><strong id="stat-cost-fixed">&#2547;0</strong></div>
+          <div class="ic-row"><span>Currently Invested</span><strong id="stat-invested-active">&#2547;0</strong></div>
+          <div class="ic-row ic-row-total"><span>Total Net Worth</span><strong id="stat-networth">&#2547;0</strong></div>
+        </div>
+      </div>
+
+      <div class="section-label"><i class="fas fa-users"></i> Member Status</div>
+      <div class="stats-grid cols-4">
+        <div class="stat-card sc-neutral"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-body"><div class="stat-val" id="stat-total-members">0</div><div class="stat-lbl">Total Members</div></div></div>
+        <div class="stat-card sc-paid"><div class="stat-icon"><i class="fas fa-circle-check"></i></div><div class="stat-body"><div class="stat-val" id="stat-paid-members">0</div><div class="stat-lbl">Paid This Month</div></div></div>
+        <div class="stat-card sc-due"><div class="stat-icon"><i class="fas fa-circle-exclamation"></i></div><div class="stat-body"><div class="stat-val" id="stat-due-members">0</div><div class="stat-lbl">With Due</div></div></div>
+        <div class="stat-card sc-advance"><div class="stat-icon"><i class="fas fa-circle-arrow-up"></i></div><div class="stat-body"><div class="stat-val" id="stat-advance-members">0</div><div class="stat-lbl">Advance Paid</div></div></div>
+      </div>
+      <div class="section-label"><i class="fas fa-chart-bar"></i> System Totals</div>
+      <div class="stats-grid cols-3">
+        <div class="stat-card sc-primary"><div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div><div class="stat-body"><div class="stat-val" id="stat-total-invoices">0</div><div class="stat-lbl">Total Invoices</div></div></div>
+        <div class="stat-card sc-due"><div class="stat-icon"><i class="fas fa-triangle-exclamation"></i></div><div class="stat-body"><div class="stat-val" id="stat-total-due">&#2547;0</div><div class="stat-lbl">Total Outstanding Due</div></div></div>
+        <div class="stat-card sc-advance"><div class="stat-icon"><i class="fas fa-arrow-up-from-bracket"></i></div><div class="stat-body"><div class="stat-val" id="stat-total-advance">&#2547;0</div><div class="stat-lbl">Total Advance Held</div></div></div>
+      </div>
+      <button class="btn btn-outline btn-sm" id="dash-export-due-list-btn" style="margin-bottom:6px"><i class="fas fa-file-excel"></i> Download Due List (with fines)</button>
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <h3><i class="fas fa-receipt"></i> Recent Transactions</h3>
+          <a href="#" class="text-link" data-view="history">View all &#8594;</a>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th></th><th>Description</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+            <tbody id="recent-invoices-body"><tr><td colspan="5" class="empty-state"><i class="fas fa-inbox"></i><br>No transactions yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- GENERATE INVOICE -->
+    <section id="invoice-view" class="view">
+      <div class="invoice-layout">
+        <div class="card invoice-form-card">
+          <div class="card-header">
+            <h3><i class="fas fa-pen-to-square"></i> Invoice Details</h3>
+            <div class="inv-num-chip" id="inv-num-badge">—</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Member <span class="req">*</span></label>
+              <div class="searchable-select" id="searchable-select">
+                <div class="select-trigger" id="select-trigger" tabindex="0">
+                  <span id="select-display" class="select-placeholder">Search by name or ID…</span>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="select-dropdown hidden" id="select-dropdown">
+                  <div class="select-search-wrap">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="member-search-input" class="select-search" placeholder="Type to search…" autocomplete="off"/>
+                  </div>
+                  <div id="select-options"></div>
+                </div>
+              </div>
+              <input type="hidden" id="selected-member-id"/>
+            </div>
+            <div class="member-pills hidden" id="member-pills">
+              <div class="pill"><span class="pill-l">ID</span><span class="pill-v" id="pill-id">—</span></div>
+              <div class="pill"><span class="pill-l">Mobile</span><span class="pill-v" id="pill-mobile">—</span></div>
+              <div class="pill"><span class="pill-l">Opening</span><span class="pill-v" id="pill-opening">&#2547;—</span></div>
+              <div class="pill"><span class="pill-l">Monthly Rate</span><span class="pill-v" id="pill-rate">&#2547;—</span></div>
+            </div>
+            <div id="auto-status-wrap" class="hidden">
+              <div class="auto-status-box" id="auto-status-box"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contribution Amount Paid (&#2547;) <span class="req">*</span></label>
+              <div class="input-prefixed"><span class="inp-prefix">&#2547;</span>
+                <input type="number" id="amount-paid" class="form-control" placeholder="e.g. 500" min="0" step="any"/></div>
+              <p class="fld-hint">Covered month(s) are calculated automatically — partial and multi-month payments both work.</p>
+            </div>
+            <div id="extra-charges-wrap" class="extra-charges-wrap hidden"></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Payment Date</label><input type="date" id="invoice-date" class="form-control"/></div>
+              <div class="form-group"><label class="form-label">Invoice Number</label><div class="ro-field" id="invoice-number-display">—</div></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Received By <span class="req">*</span></label>
+                <select id="invoice-receiver" class="form-control"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payment Method <span class="req">*</span></label>
+                <select id="invoice-method" class="form-control"></select>
+              </div>
+            </div>
+            <div class="form-group" id="invoice-reference-wrap">
+              <label class="form-label">Payment Reference Number</label>
+              <input type="text" id="invoice-reference" class="form-control" placeholder="Transaction / TrxID"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes <span class="lbl-hint">Optional</span></label>
+              <textarea id="invoice-notes" class="form-control" rows="2" placeholder="Any remarks…"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="preview-invoice-btn"><i class="fas fa-eye"></i> Preview</button>
+              <button type="button" class="btn btn-primary" id="generate-invoice-btn"><i class="fas fa-file-pdf"></i> Generate &amp; Download PDF</button>
+            </div>
+          </div>
+        </div>
+        <div class="live-preview-card" id="live-preview-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fas fa-eye"></i> Live Preview</h3>
+              <div class="zoom-controls">
+                <button type="button" class="icon-btn icon-btn-sm" id="zoom-out-btn"><i class="fas fa-magnifying-glass-minus"></i></button>
+                <span id="zoom-level-label">46%</span>
+                <button type="button" class="icon-btn icon-btn-sm" id="zoom-in-btn"><i class="fas fa-magnifying-glass-plus"></i></button>
+                <button type="button" class="icon-btn icon-btn-sm" id="zoom-reset-btn" title="Reset zoom"><i class="fas fa-arrows-rotate"></i></button>
+              </div>
+            </div>
+            <div class="live-preview-body">
+              <div id="live-preview-container">
+                <div class="preview-empty"><i class="fas fa-file-invoice"></i><p>Select a member to preview</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVOICE HISTORY -->
+    <section id="history-view" class="view">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-clock-rotate-left"></i> Invoice History</h3>
+          <button class="btn btn-outline btn-sm" id="export-history-btn"><i class="fas fa-file-excel"></i> Export</button>
+        </div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <div class="search-wrap"><i class="fas fa-magnifying-glass"></i>
+              <input type="text" id="history-search" class="form-control" placeholder="Search name, invoice #…"/></div>
+            <select id="history-year-filter" class="form-control filter-sel">
+              <option value="">All Years</option>
+              <option value="2024">2024</option><option value="2025">2025</option>
+              <option value="2026">2026</option><option value="2027">2027</option>
+            </select>
+            <button class="btn btn-outline btn-sm" id="clear-history-filters"><i class="fas fa-xmark"></i></button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>Invoice #</th><th>Member</th><th>Month/Year</th><th>Amount</th><th>Post-Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="history-table-body"><tr><td colspan="7" class="empty-state"><i class="fas fa-inbox"></i><br>No invoices yet.</td></tr></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="history-footer"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTRIBUTION LEDGER -->
+    <section id="ledger-view" class="view">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-book-open"></i> Contribution Ledger</h3>
+          <div class="header-actions">
+            <button class="btn btn-outline btn-sm" id="export-ledger-btn"><i class="fas fa-file-excel"></i> Export</button>
+            <button class="btn btn-outline btn-sm" id="export-due-list-btn" title="Members currently due, with fines"><i class="fas fa-triangle-exclamation"></i> Due List</button>
+            <button class="btn btn-outline btn-sm" id="refresh-ledger-btn"><i class="fas fa-rotate"></i></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <div class="search-wrap"><i class="fas fa-magnifying-glass"></i>
+              <input type="text" id="ledger-search" class="form-control" placeholder="Search member…"/></div>
+            <select id="ledger-status-filter" class="form-control filter-sel">
+              <option value="">All Status</option>
+              <option value="paid">Paid</option><option value="due">Due</option>
+              <option value="advance">Advance</option><option value="unknown">Not Recorded</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>Member</th><th>Opening (&#2547;)</th><th>System Paid (&#2547;)</th><th>Total (&#2547;)</th><th>Status</th><th>Due / Advance</th><th>Last Paid</th><th>Actions</th></tr></thead>
+              <tbody id="ledger-body"><tr><td colspan="8" class="empty-state">Loading…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="table-footer" id="ledger-footer"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section id="members-view" class="view">
+      <div class="card hidden" id="join-requests-panel" style="padding-bottom:16px"></div>
+      <div class="card hidden" id="nominee-requests-panel" style="padding-bottom:16px"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-users"></i> Member Management</h3>
+          <div class="header-actions">
+            <button class="btn btn-outline btn-sm" id="import-members-btn"><i class="fas fa-file-import"></i> Import</button>
+            <input type="file" id="import-excel-input" accept=".xlsx,.xls,.csv" style="display:none"/>
+            <button class="btn btn-outline btn-sm" id="export-members-btn"><i class="fas fa-file-excel"></i> Export</button>
+            <button class="btn btn-primary btn-sm" id="add-member-btn"><i class="fas fa-plus"></i> Add Member</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="filter-bar">
+            <div class="search-wrap"><i class="fas fa-magnifying-glass"></i>
+              <input type="text" id="member-table-search" class="form-control" placeholder="Search by name, ID, mobile…"/></div>
+            <select id="member-status-filter" class="form-control filter-sel">
+              <option value="">All Status</option>
+              <option value="paid">Paid</option><option value="due">Due</option><option value="advance">Advance</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Monthly</th><th>Total</th><th>Status</th><th>Portal</th><th>Actions</th></tr></thead>
+              <tbody id="members-table-body"><tr><td colspan="8" class="empty-state"><i class="fas fa-users"></i><br>No members.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COST & INVESTMENT -->
+    <section id="costs-view" class="view">
+      <div class="ci-tabs">
+        <button class="ci-tab active" data-citab="costs"><i class="fas fa-receipt"></i> Costs</button>
+        <button class="ci-tab" data-citab="fixedcost"><i class="fas fa-file-contract"></i> Fixed Cost</button>
+        <button class="ci-tab" data-citab="investments"><i class="fas fa-chart-line"></i> Investments</button>
+        <button class="ci-tab" data-citab="fines"><i class="fas fa-gavel"></i> Fines</button>
+      </div>
+
+      <div id="ci-costs" class="ci-panel active">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-receipt"></i> Operating Cost Vouchers</h3>
+            <button class="btn btn-primary btn-sm" id="add-cost-btn"><i class="fas fa-plus"></i> Add Cost</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>Voucher #</th><th>Sector</th><th>Description</th><th>Amount</th><th>Date</th></tr></thead>
+              <tbody id="costs-table-body"><tr><td colspan="5" class="empty-state">No cost vouchers yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="ci-fixedcost" class="ci-panel">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-file-contract"></i> Fixed Cost Recovery Campaigns</h3>
+            <button class="btn btn-primary btn-sm" id="add-fixedcost-btn"><i class="fas fa-plus"></i> New Campaign</button>
+          </div>
+          <div class="card-body">
+            <p class="fld-hint" style="margin-top:0">e.g. registration / constitution cost — recovered as a one-time share collected from each member, shown on their invoice until paid.</p>
+            <div id="fixedcost-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="ci-investments" class="ci-panel">
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-line"></i> Investments</h3>
+            <button class="btn btn-primary btn-sm" id="add-investment-btn"><i class="fas fa-plus"></i> Add Investment</button>
+          </div>
+          <div class="card-body">
+            <div id="investments-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="ci-fines" class="ci-panel">
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-gavel"></i> Member Fines</h3></div>
+          <div class="card-body" style="padding-top:0">
+            <p class="fld-hint">Add a fine from a member's row in Members &#8594; Actions.</p>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead><tr><th>Voucher #</th><th>Member</th><th>Reason</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody id="fines-table-body"><tr><td colspan="6" class="empty-state">No fines recorded.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings-view" class="view">
+      <div class="settings-grid">
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-building"></i> Organization</h3></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Organization Name</label><input type="text" id="s-org-name" class="form-control"/></div>
+            <div class="form-group"><label class="form-label">Subtitle / Tagline</label><input type="text" id="s-org-subtitle" class="form-control"/></div>
+            <div class="form-group"><label class="form-label">Address</label><input type="text" id="s-org-address" class="form-control"/></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Contact Phone</label><input type="text" id="s-org-phone" class="form-control" placeholder="+880 1XXXXXXXXX"/></div>
+              <div class="form-group"><label class="form-label">Contact Email</label><input type="email" id="s-org-email" class="form-control"/></div>
+            </div>
+            <div class="form-group"><label class="form-label">Facebook Page URL</label><input type="text" id="s-org-facebook" class="form-control" placeholder="https://facebook.com/…"/></div>
+            <div class="form-group"><label class="form-label">Receipt Footer Text</label><textarea id="s-footer-text" class="form-control" rows="2"></textarea></div>
+            <button class="btn btn-primary btn-sm" id="save-org-btn"><i class="fas fa-floppy-disk"></i> Save Organization</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-vault"></i> Fund Management</h3></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Organization Opening Fund (&#2547;)</label>
+              <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="s-opening-fund" class="form-control" min="0"/></div>
+              <p class="fld-hint">Existing funds before this system. Counted into the fund balance, but no longer shown as its own dashboard card.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="save-fund-btn"><i class="fas fa-floppy-disk"></i> Save Opening Fund</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-hashtag"></i> Invoice Settings</h3></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Invoice Prefix <span class="lbl-hint">Optional, prepended before the number</span></label><input type="text" id="s-inv-prefix" class="form-control" placeholder="e.g. DD-"/></div>
+            <div class="form-group"><label class="form-label">Next Invoice Number</label><input type="number" id="s-inv-number" class="form-control"/>
+              <p class="fld-hint">Invoice numbers render as <code>NUMBER_MemberName</code>.</p></div>
+            <div class="form-group"><label class="form-label">Treasurer Name</label><input type="text" id="s-treasurer-name" class="form-control"/></div>
+            <button class="btn btn-primary btn-sm" id="save-invoice-settings-btn"><i class="fas fa-floppy-disk"></i> Save</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-users-gear"></i> Payment Receivers</h3></div>
+          <div class="card-body">
+            <p class="fld-hint" style="margin-top:0">People who can receive contributions — chosen from a dropdown when generating each invoice.</p>
+            <div id="receivers-list"></div>
+            <div class="btn-stack" style="margin-top:10px">
+              <button class="btn btn-outline btn-sm" id="add-receiver-btn"><i class="fas fa-plus"></i> Add Receiver</button>
+              <button class="btn btn-primary btn-sm" id="save-receivers-btn"><i class="fas fa-floppy-disk"></i> Save Receivers</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-image"></i> Logo, Signatures &amp; Seal</h3></div>
+          <div class="card-body">
+            <div class="form-group"><label class="form-label">Organization Logo</label>
+              <div class="upload-zone" id="logo-zone">
+                <img id="logo-preview-img" src="" alt="" style="display:none;max-height:70px"/>
+                <div id="logo-ph"><i class="fas fa-cloud-arrow-up"></i><span>Click to upload logo</span><small>PNG/JPG/SVG · Max 3MB</small></div>
+                <input type="file" id="logo-file-input" accept="image/*" style="display:none"/>
+              </div>
+              <button class="btn btn-danger btn-sm" id="remove-logo-btn" style="margin-top:6px;display:none"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <div class="form-group"><label class="form-label">Treasurer Signature</label>
+              <div class="upload-zone" id="treasurer-sig-zone">
+                <img id="treasurer-sig-preview" src="" alt="" style="display:none;max-height:55px"/>
+                <div id="treasurer-sig-ph"><i class="fas fa-pen-nib"></i><span>Treasurer signature</span><small>PNG transparent preferred</small></div>
+                <input type="file" id="treasurer-sig-input" accept="image/*" style="display:none"/>
+              </div>
+              <button class="btn btn-danger btn-sm" id="remove-treasurer-sig-btn" style="margin-top:6px;display:none"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <div class="form-group"><label class="form-label">Authorized Signature</label>
+              <div class="upload-zone" id="sig-zone">
+                <img id="sig-preview-img" src="" alt="" style="display:none;max-height:55px"/>
+                <div id="sig-ph"><i class="fas fa-signature"></i><span>Authorized signature</span><small>PNG transparent preferred</small></div>
+                <input type="file" id="sig-file-input" accept="image/*" style="display:none"/>
+              </div>
+              <button class="btn btn-danger btn-sm" id="remove-sig-btn" style="margin-top:6px;display:none"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <div class="form-group"><label class="form-label">Official Seal <span class="lbl-hint">Stamped on every invoice</span></label>
+              <div class="upload-zone" id="seal-zone">
+                <img id="seal-preview-img" src="" alt="" style="display:none;max-height:70px"/>
+                <div id="seal-ph"><i class="fas fa-stamp"></i><span>Organization seal</span><small>PNG transparent preferred</small></div>
+                <input type="file" id="seal-file-input" accept="image/*" style="display:none"/>
+              </div>
+              <button class="btn btn-danger btn-sm" id="remove-seal-btn" style="margin-top:6px;display:none"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-address-book"></i> Contact Card <span class="lbl-hint" style="font-weight:400">shown to members</span></h3></div>
+          <div class="card-body">
+            <p class="fld-hint" style="margin-top:0">Shown on the member portal's Contact Admin page, so members know who to reach out to.</p>
+            <div class="form-group"><label class="form-label">Treasurer Photo</label>
+              <div class="upload-zone" id="treasurer-photo-zone">
+                <img id="treasurer-photo-preview-img" src="" alt="" style="display:none;max-height:70px;border-radius:50%"/>
+                <div id="treasurer-photo-ph"><i class="fas fa-user-tie"></i><span>Treasurer photo</span></div>
+                <input type="file" id="treasurer-photo-input" accept="image/*" style="display:none"/>
+              </div>
+            </div>
+            <hr class="divider"/>
+            <div class="form-group"><label class="form-label">Admin Display Name</label><input type="text" id="s-admin-display-name" class="form-control" placeholder="e.g. Md. Naeem Hossain Bepari"/></div>
+            <div class="form-group"><label class="form-label">Admin Role / Title</label><input type="text" id="s-admin-display-role" class="form-control" placeholder="e.g. Vice Chairman"/></div>
+            <div class="form-group"><label class="form-label">Admin Photo</label>
+              <div class="upload-zone" id="admin-photo-zone">
+                <img id="admin-photo-preview-img" src="" alt="" style="display:none;max-height:70px;border-radius:50%"/>
+                <div id="admin-photo-ph"><i class="fas fa-user-shield"></i><span>Admin photo</span></div>
+                <input type="file" id="admin-photo-input" accept="image/*" style="display:none"/>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="save-contact-card-btn"><i class="fas fa-floppy-disk"></i> Save Contact Card</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-user-shield"></i> Admin Account</h3></div>
+          <div class="card-body">
+            <p class="fld-hint" style="margin-top:0">Signed in as <strong id="s-admin-email-display">—</strong></p>
+            <div class="form-group"><label class="form-label">New Email</label><input type="email" id="s-admin-new-email" class="form-control" placeholder="new@example.com"/></div>
+            <div class="form-group"><label class="form-label">Current Password <span class="lbl-hint">to confirm email change</span></label><input type="password" id="s-admin-email-pwd" class="form-control"/></div>
+            <div id="admin-email-change-err" class="auth-error hidden"></div>
+            <button class="btn btn-outline btn-sm" id="change-admin-email-btn"><i class="fas fa-envelope"></i> Update Email</button>
+            <hr class="divider"/>
+            <div class="form-group"><label class="form-label">Current Password</label><input type="password" id="s-admin-current-pwd" class="form-control"/></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">New Password</label><input type="password" id="s-admin-new-pwd" class="form-control" placeholder="Min 6 characters"/></div>
+              <div class="form-group"><label class="form-label">Confirm New Password</label><input type="password" id="s-admin-new-pwd2" class="form-control"/></div>
+            </div>
+            <div id="admin-pwd-change-err" class="auth-error hidden"></div>
+            <button class="btn btn-outline btn-sm" id="change-admin-pwd-btn"><i class="fas fa-key"></i> Update Password</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-database"></i> Backup &amp; Danger Zone</h3></div>
+          <div class="card-body">
+            <div class="btn-stack">
+              <button class="btn btn-outline" id="backup-btn"><i class="fas fa-download"></i> Download Backup (JSON)</button>
+              <hr class="divider"/>
+              <button class="btn btn-danger" id="clear-all-btn"><i class="fas fa-triangle-exclamation"></i> Clear All Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADMIN MODALS
+════════════════════════════════════════ -->
+
+<!-- Invoice Preview -->
+<div id="invoice-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <h3><i class="fas fa-receipt"></i> Invoice Preview</h3>
+      <div class="modal-head-acts">
+        <button class="btn btn-outline btn-sm" id="modal-print-btn"><i class="fas fa-print"></i> Print</button>
+        <button class="btn btn-primary btn-sm" id="modal-pdf-btn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+        <button class="icon-btn" data-close="invoice-modal"><i class="fas fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="modal-body inv-modal-body"><div id="invoice-print-area"></div></div>
+  </div>
+</div>
+
+<!-- Add/Edit Member (Quick) -->
+<div id="member-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3 id="member-modal-title"><i class="fas fa-user-plus"></i> Add Member</h3>
+      <button class="icon-btn" data-close="member-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="member-form" novalidate>
+        <input type="hidden" id="editing-member-id"/>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Member ID <span class="req">*</span></label>
+            <input type="text" id="mf-id" class="form-control" placeholder="DD-001" required/></div>
+          <div class="form-group"><label class="form-label">Mobile</label>
+            <input type="text" id="mf-mobile" class="form-control" placeholder="01XXXXXXXXX"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label>
+          <input type="text" id="mf-name" class="form-control" placeholder="FULL NAME" required/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Monthly Amount (&#2547;)</label>
+            <input type="number" id="mf-monthly" class="form-control" placeholder="500" min="0"/></div>
+          <div class="form-group"><label class="form-label">Opening Contribution (&#2547;)</label>
+            <input type="number" id="mf-opening" class="form-control" placeholder="0" min="0"/></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paid Through <span class="lbl-hint">for auto due/advance</span></label>
+          <div class="form-row">
+            <select id="mf-paid-month" class="form-control">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+            <input type="number" id="mf-paid-year" class="form-control" placeholder="2026" min="2020"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="member-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Leave / Rejoin Member -->
+<div id="leave-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3 id="leave-modal-title"><i class="fas fa-door-open"></i> Mark as Left</h3>
+      <button class="icon-btn" data-close="leave-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="leave-form" novalidate>
+        <input type="hidden" id="leave-member-id"/>
+        <div id="leave-fields">
+          <div class="form-group"><label class="form-label">Leaving Date</label><input type="date" id="leave-date-input" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Note <span class="lbl-hint">e.g. termination letter ref.</span></label>
+            <textarea id="leave-note-input" class="form-control" rows="2"></textarea></div>
+        </div>
+        <p class="fld-hint">Their history and past invoices stay on record either way.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="leave-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="leave-submit-btn"><i class="fas fa-door-open"></i> Confirm Leave</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Fine -->
+<div id="fine-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3 id="fine-modal-title"><i class="fas fa-gavel"></i> Add Fine</h3>
+      <button class="icon-btn" data-close="fine-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="fine-form" novalidate>
+        <input type="hidden" id="fine-member-id"/>
+        <div class="form-group"><label class="form-label">Fine Amount (&#2547;) <span class="req">*</span></label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="fine-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-group"><label class="form-label">Reason <span class="req">*</span></label>
+          <textarea id="fine-reason" class="form-control" rows="2" placeholder="Why is this fine being issued?"></textarea></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="fine-date" class="form-control"/></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="fine-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-gavel"></i> Add Fine</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Cost -->
+<div id="cost-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3><i class="fas fa-receipt"></i> Add Cost Voucher</h3>
+      <button class="icon-btn" data-close="cost-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="cost-form" novalidate>
+        <div class="form-group"><label class="form-label">Sector <span class="req">*</span></label>
+          <input type="text" id="cost-sector" class="form-control" placeholder="e.g. Office, Printing, Travel"/></div>
+        <div class="form-group"><label class="form-label">Amount (&#2547;) <span class="req">*</span></label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="cost-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="cost-desc" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="cost-date" class="form-control"/></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="cost-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Save Voucher</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- New Fixed Cost Campaign -->
+<div id="fixedcost-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3><i class="fas fa-file-contract"></i> New Fixed Cost Campaign</h3>
+      <button class="icon-btn" data-close="fixedcost-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="fixedcost-form" novalidate>
+        <div class="form-group"><label class="form-label">Name <span class="req">*</span></label>
+          <input type="text" id="fixedcost-name" class="form-control" placeholder="e.g. Constitution / Registration Cost"/></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Total Cost (&#2547;) <span class="req">*</span></label>
+            <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="fixedcost-total" class="form-control" min="0" step="any"/></div></div>
+          <div class="form-group"><label class="form-label">Per-Member Share (&#2547;) <span class="req">*</span></label>
+            <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="fixedcost-share" class="form-control" min="0" step="any"/></div></div>
+        </div>
+        <p class="fld-hint" id="fixedcost-share-hint" style="margin-top:-6px"></p>
+        <div class="form-group"><label class="form-label">Description</label><textarea id="fixedcost-desc" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="fixedcost-date" class="form-control"/></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="fixedcost-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Create Campaign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Record Fixed Cost Payment (direct, not via invoice) -->
+<div id="fixedcost-payment-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-xs">
+    <div class="modal-head">
+      <h3 id="fcp-title"><i class="fas fa-hand-holding-dollar"></i> Record Payment</h3>
+      <button class="icon-btn" data-close="fixedcost-payment-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="fixedcost-payment-form" novalidate>
+        <input type="hidden" id="fcp-fixedcost-id"/>
+        <div class="form-group"><label class="form-label">Member</label><select id="fcp-member-select" class="form-control"></select></div>
+        <div class="form-group"><label class="form-label">Amount (&#2547;)</label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="fcp-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="fcp-date" class="form-control"/></div>
+        <p class="fld-hint">Recorded directly against this campaign — not added to their invoice.</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="fixedcost-payment-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Record Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Investment -->
+<div id="investment-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-sm">
+    <div class="modal-head">
+      <h3><i class="fas fa-chart-line"></i> Add Investment</h3>
+      <button class="icon-btn" data-close="investment-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="investment-form" novalidate>
+        <div class="form-group"><label class="form-label">Investment Name <span class="req">*</span></label>
+          <input type="text" id="invest-name" class="form-control" placeholder="e.g. XYZ Business Partnership"/></div>
+        <div class="form-group"><label class="form-label">Invested Amount (&#2547;) <span class="req">*</span></label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="invest-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Investment Date</label><input type="date" id="invest-date" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Expected Withdrawal Date</label><input type="date" id="invest-withdraw-date" class="form-control"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="invest-notes" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">Documents <span class="lbl-hint">Deed, stamp, cheque, consent paper, NID, photo, signature…</span></label>
+          <div class="upload-zone" id="invest-doc-zone" onclick="document.getElementById('invest-doc-input').click()">
+            <div><i class="fas fa-folder-open"></i><span>Click to attach documents</span><small>Multiple files supported</small></div>
+            <input type="file" id="invest-doc-input" accept="image/*,.pdf" multiple style="display:none"/>
+          </div>
+          <div id="invest-doc-list" class="doc-chip-row"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="investment-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="investment-save-btn"><i class="fas fa-floppy-disk"></i> Save Investment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Record Investment Profit -->
+<div id="invest-profit-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-xs">
+    <div class="modal-head">
+      <h3 id="invest-profit-title"><i class="fas fa-chart-line"></i> Record Profit</h3>
+      <button class="icon-btn" data-close="invest-profit-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="invest-profit-form" novalidate>
+        <input type="hidden" id="profit-invest-id"/>
+        <div class="form-group"><label class="form-label">Profit Amount (&#2547;) <span class="req">*</span></label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="profit-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="profit-date" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="profit-notes" class="form-control" rows="2"></textarea></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="invest-profit-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk"></i> Record Profit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Investment Principal -->
+<div id="invest-withdraw-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-xs">
+    <div class="modal-head">
+      <h3 id="invest-withdraw-title"><i class="fas fa-vault"></i> Withdraw Principal</h3>
+      <button class="icon-btn" data-close="invest-withdraw-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="invest-withdraw-form" novalidate>
+        <input type="hidden" id="withdraw-invest-id"/>
+        <div class="form-group"><label class="form-label">Withdrawal Amount (&#2547;) <span class="req">*</span></label>
+          <div class="input-prefixed"><span class="inp-prefix">&#2547;</span><input type="number" id="withdraw-amount" class="form-control" min="0" step="any"/></div></div>
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="withdraw-date" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="withdraw-notes" class="form-control" rows="2"></textarea></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" data-close="invest-withdraw-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-vault"></i> Record Withdrawal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Full Member Profile Modal (Admin only) -->
+<div id="member-profile-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-md">
+    <div class="modal-head">
+      <h3 id="profile-modal-title"><i class="fas fa-id-card"></i> Member Profile</h3>
+      <button class="icon-btn" data-close="member-profile-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="profile-member-id"/>
+      <div class="profile-header">
+        <div class="profile-photo-wrap">
+          <img id="profile-photo-display" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover"/>
+          <div id="profile-photo-placeholder"><i class="fas fa-user"></i></div>
+          <button type="button" class="profile-photo-edit-btn" id="profile-photo-edit-btn" title="Change Photo"><i class="fas fa-camera"></i></button>
+          <input type="file" id="profile-photo-input" accept="image/*" style="display:none"/>
+        </div>
+        <div class="profile-header-info">
+          <div class="profile-display-name" id="profile-display-name">—</div>
+          <div class="profile-display-id" id="profile-display-id">—</div>
+          <div id="profile-status-line" style="margin-top:5px"></div>
+        </div>
+      </div>
+      <div class="profile-tabs">
+        <button class="profile-tab active" data-ptab="basic"><i class="fas fa-circle-info"></i> Basic</button>
+        <button class="profile-tab" data-ptab="personal"><i class="fas fa-user"></i> Personal</button>
+        <button class="profile-tab" data-ptab="documents"><i class="fas fa-folder-open"></i> Documents</button>
+        <button class="profile-tab" data-ptab="nominee"><i class="fas fa-user-shield"></i> Nominee</button>
+        <button class="profile-tab" data-ptab="rates"><i class="fas fa-clock-rotate-left"></i> Rate History</button>
+      </div>
+      <!-- Tab: Basic -->
+      <div id="ptab-basic" class="profile-tab-content active">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="pf-name" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Mobile</label><input type="text" id="pf-mobile" class="form-control"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Monthly Amount (&#2547;)</label><input type="number" id="pf-monthly" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Opening Contribution (&#2547;)</label><input type="number" id="pf-opening" class="form-control"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Ledger Baseline — Paid Through <span class="lbl-hint">for auto due/advance</span></label>
+          <div class="form-row">
+            <select id="pf-paid-month" class="form-control">
+              <option value="">Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+            <input type="number" id="pf-paid-year" class="form-control" placeholder="2026"/>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Personal -->
+      <div id="ptab-personal" class="profile-tab-content">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Father's Name</label><input type="text" id="pf-father" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Mother's Name</label><input type="text" id="pf-mother" class="form-control"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" id="pf-birthdate" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Blood Group</label>
+            <select id="pf-blood" class="form-control">
+              <option value="">Select</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">National ID Number</label><input type="text" id="pf-nid" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Present Address</label><textarea id="pf-present-addr" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label class="form-label">Permanent Address</label><textarea id="pf-permanent-addr" class="form-control" rows="2"></textarea></div>
+      </div>
+      <!-- Tab: Documents -->
+      <div id="ptab-documents" class="profile-tab-content">
+        <div class="form-group"><label class="form-label">Profile Photo <span class="lbl-hint">Square preferred</span></label>
+          <div class="doc-upload-zone" onclick="document.getElementById('profile-photo-input').click()">
+            <img id="profile-photo-preview" src="" alt="" style="display:none;max-height:120px;border-radius:8px"/>
+            <div id="profile-photo-placeholder2"><i class="fas fa-user-circle"></i><span>Click to upload photo</span></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">NID — Front Page</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('profile-nidfront-input').click()">
+              <img id="profile-nidfront-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="profile-nidfront-ph"><i class="fas fa-id-card"></i><span>NID front</span></div>
+              <input type="file" id="profile-nidfront-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">NID — Back Page</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('profile-nidback-input').click()">
+              <img id="profile-nidback-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="profile-nidback-ph"><i class="fas fa-id-card"></i><span>NID back</span></div>
+              <input type="file" id="profile-nidback-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Signature</label>
+          <div class="doc-upload-zone" onclick="document.getElementById('profile-sig-input').click()">
+            <img id="profile-sig-preview" src="" alt="" style="display:none;max-height:70px"/>
+            <div id="profile-sig-ph"><i class="fas fa-signature"></i><span>Member signature</span></div>
+            <input type="file" id="profile-sig-input" accept="image/*" style="display:none"/>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Nominee -->
+      <div id="ptab-nominee" class="profile-tab-content">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nominee Name</label><input type="text" id="pf-nominee-name" class="form-control"/></div>
+          <div class="form-group"><label class="form-label">Relation</label>
+            <select id="pf-nominee-relation" class="form-control">
+              <option value="">Select</option>
+              <option>Father</option><option>Mother</option><option>Spouse</option>
+              <option>Son</option><option>Daughter</option><option>Brother</option>
+              <option>Sister</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Nominee NID Number</label><input type="text" id="pf-nominee-nid" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Nominee Photo</label>
+          <div class="doc-upload-zone" onclick="document.getElementById('profile-nominee-photo-input').click()">
+            <img id="profile-nominee-photo-preview" src="" alt="" style="display:none;max-height:100px;border-radius:8px"/>
+            <div id="profile-nominee-photo-ph"><i class="fas fa-user"></i><span>Nominee photo</span></div>
+            <input type="file" id="profile-nominee-photo-input" accept="image/*" style="display:none"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Nominee NID — Front</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('profile-nominee-nidfront-input').click()">
+              <img id="profile-nominee-nidfront-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="profile-nominee-nidfront-ph"><i class="fas fa-id-card"></i><span>NID front</span></div>
+              <input type="file" id="profile-nominee-nidfront-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Nominee NID — Back</label>
+            <div class="doc-upload-zone" onclick="document.getElementById('profile-nominee-nidback-input').click()">
+              <img id="profile-nominee-nidback-preview" src="" alt="" style="display:none;max-height:100px;border-radius:6px"/>
+              <div id="profile-nominee-nidback-ph"><i class="fas fa-id-card"></i><span>NID back</span></div>
+              <input type="file" id="profile-nominee-nidback-input" accept="image/*" style="display:none"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Rate History -->
+      <div id="ptab-rates" class="profile-tab-content">
+        <p class="fld-hint" style="margin-top:0">Record the monthly rate for each year it changed. Months in a year with no entry use the closest earlier year's rate — so this can stay empty and the member's current Monthly Amount will apply to all past months.</p>
+        <div id="rate-history-list"></div>
+        <button type="button" class="btn btn-outline btn-sm" id="add-rate-history-btn" style="margin-top:10px"><i class="fas fa-plus"></i> Add Year</button>
+      </div>
+      <div class="form-actions" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+        <button class="btn btn-outline" data-close="member-profile-modal">Cancel</button>
+        <button class="btn btn-primary" id="save-profile-btn"><i class="fas fa-floppy-disk"></i> Save Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Member History Modal -->
+<div id="member-history-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-md">
+    <div class="modal-head">
+      <h3 id="mh-modal-title"><i class="fas fa-clock-rotate-left"></i> Payment History</h3>
+      <button class="icon-btn" data-close="member-history-modal"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="mh-stats"></div>
+      <div class="table-responsive" style="margin-top:14px">
+        <table class="data-table">
+          <thead><tr><th>Invoice #</th><th>Month/Year</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+          <tbody id="mh-body"><tr><td colspan="5" class="empty-state">No history.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal-overlay hidden">
+  <div class="modal-box modal-xs">
+    <div class="modal-body confirm-body">
+      <div class="confirm-icon" id="confirm-icon"><i class="fas fa-triangle-exclamation"></i></div>
+      <h3 id="confirm-title">Confirm</h3>
+      <p id="confirm-msg" class="confirm-msg"></p>
+      <div id="confirm-pwd-wrap" class="hidden" style="margin-top:14px">
+        <div class="form-group">
+          <label class="form-label">Admin Password to Confirm</label>
+          <input type="password" id="confirm-pwd-input" class="form-control" placeholder="Enter admin password"/>
+        </div>
+        <div id="confirm-pwd-err" class="auth-error hidden"><i class="fas fa-circle-xmark"></i> Incorrect password.</div>
+      </div>
+      <div class="form-actions" style="justify-content:center;margin-top:18px">
+        <button class="btn btn-outline" id="confirm-cancel-btn">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script type="module" src="js/script.js"></script>
+</body>
+</html>

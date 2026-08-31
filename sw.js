@@ -5,8 +5,8 @@ const ASSETS = [
   './css/style.css',
   './js/script.js',
   './json/manifest.json',
-  './icon/icon-192.png',
-  './icon/icon-512.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 

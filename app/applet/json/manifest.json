@@ -1,17 +1,17 @@
 {
-  "name": "DD Contribution Management System",
+  "name": "DD CMS — Dream Development",
   "short_name": "DD CMS",
-  "description": "Dream Development — Member Contribution & Invoice System",
-  "start_url": "../index.html",
-  "scope": "../",
+  "description": "Contribution & Investment Management System",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
     "standalone",
     "minimal-ui"
   ],
-  "background_color": "#1E3A8A",
-  "theme_color": "#2563EB",
+  "background_color": "#0F172A",
+  "theme_color": "#0F766E",
   "orientation": "portrait-primary",
   "categories": [
     "finance",
@@ -20,23 +20,16 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "../assets/icon-192.png",
+      "src": "/assets/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "../assets/icon-512.png",
+      "src": "/assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "../assets/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
     }
   ],
   "shortcuts": [
@@ -44,10 +37,10 @@
       "name": "New Invoice",
       "short_name": "Invoice",
       "description": "Generate a new invoice",
-      "url": "../index.html#invoice",
+      "url": "/?view=invoice",
       "icons": [
         {
-          "src": "../assets/icon-192.png",
+          "src": "/assets/icon-192.png",
           "sizes": "192x192",
           "type": "image/png"
         }

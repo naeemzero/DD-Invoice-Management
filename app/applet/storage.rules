@@ -1,0 +1,66 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════
+// DD CMS — Firebase Storage Security Rules
+//
+// HOW TO DEPLOY (one-time):
+//   1. Firebase Console → your project → Storage
+//      → if you haven't already, click "Get started" to enable Storage
+//        (free Spark plan includes 5GB storage / 1GB per day download)
+//   2. Storage → Rules tab → delete everything there → paste this whole
+//      file → click Publish
+// ═══════════════════════════════════════════════════════════
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn(){ return request.auth != null; }
+
+    function isAdmin(){
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwnMember(memberId){
+      return isSignedIn() &&
+        firestore.get(/databases/(default)/documents/members/$(memberId)).data.auth_uid == request.auth.uid;
+    }
+
+    // Member documents (photo, NID front/back, signature, nominee docs):
+    // admin has full access. The member themselves may read their own
+    // folder, and may self-upload ONLY a replacement profile photo
+    // (small image files only) — everything else stays admin-managed.
+    match /members/{memberId}/{allPaths=**} {
+      allow read: if isAdmin() || isOwnMember(memberId);
+      allow write: if isAdmin()
+        || (isOwnMember(memberId)
+            && request.resource.size < 500 * 1024
+            && request.resource.contentType.matches('image/.*'));
+    }
+
+    // Membership join-request attachments: the applicant isn't signed in
+    // yet, so uploads here must be public-write. Never publicly readable —
+    // only admin reviews them. Small image files only.
+    match /joinRequests/{reqId}/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Investment proof documents: admin only — never member-facing.
+    match /investments/{investId}/{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Org branding assets (logo, signatures, seal): shown on the public
+    // auth screen and on every invoice, so public read; admin-only write.
+    match /logos/{allPaths=**}      { allow read: if true; allow write: if isAdmin(); }
+    match /signatures/{allPaths=**} { allow read: if true; allow write: if isAdmin(); }
+    match /seals/{allPaths=**}      { allow read: if true; allow write: if isAdmin(); }
+
+    // Deny everything else by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
